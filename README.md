@@ -7,6 +7,7 @@ If you're a developer, blogger, or designer, you often need a fast way to:
 1. **Compress Images**: Save storage space by converting heavy PNGs/JPGs to WebP format.
 2. **Auto-Host**: Get direct links for your website, GitHub README, or portfolio without manual uploads.
 3. **Speed Up Workflow**: Drag-and-drop multiple images, let them optimize in parallel, and push them to your repo in one click! ⚡
+4. Personally i use it for hosting screenshots of apps/tools/sites/softwares... 
 
 ---
 
