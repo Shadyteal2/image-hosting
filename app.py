@@ -17,6 +17,7 @@ st.set_page_config(
 
 # Try to get GitHub Token from secrets (Cloud) or environment (Local)
 GITHUB_TOKEN = st.secrets.get("GITHUB_TOKEN", os.getenv("GITHUB_TOKEN"))
+OUTPUT_DIR = "assets"
 GITHUB_USER = "Shadyteal2"
 GITHUB_REPO = "image-hosting"
 GITHUB_BRANCH = "main"
