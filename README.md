@@ -1,4 +1,5 @@
 # 🚀 ImageSync Pro | by ShadyBilla
+![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
 
 A high-performance local & cloud web dashboard built with Streamlit for optimizing images and serving them instantly via GitHub.
 
