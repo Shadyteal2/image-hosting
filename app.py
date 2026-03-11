@@ -128,8 +128,12 @@ def sync_to_github_api(results):
                     raise e
                     
         return True, f"Successfully uploaded {len(success_list)} images via API."
-    except Exception as e:
+    except GithubException as e:
+        if e.status == 401:
+            return False, "401 Bad Credentials: Your GITHUB_TOKEN is either invalid, expired, or missing 'repo' permissions."
         return False, f"GitHub API Error: {str(e)}"
+    except Exception as e:
+        return False, f"Error: {str(e)}"
 
 # --- Main Dashboard ---
 
@@ -141,9 +145,21 @@ def main():
         st.info(f"📍 Output: `/{OUTPUT_DIR}`")
         st.info(f"🔗 Repo: `{GITHUB_USER}/{GITHUB_REPO}`")
         st.info(f"🌿 Branch: `{GITHUB_BRANCH}`")
+        
+        st.divider()
+        st.markdown("### 🔑 Credential Debugger")
+        if GITHUB_TOKEN:
+            st.success("✅ Token found in Secrets")
+            # Show masked token for verification (e.g., ghp_...abcd)
+            masked = f"{GITHUB_TOKEN[:4]}...{GITHUB_TOKEN[-4:]}" if len(GITHUB_TOKEN) > 8 else "****"
+            st.caption(f"Token format: `{masked}`")
+        else:
+            st.error("❌ Token not found")
+            st.markdown("[How to add to Secrets?](https://docs.streamlit.io/deploy/streamlit-community-cloud/deploy-your-app/secrets-management)")
+
         if not GITHUB_TOKEN:
-            st.warning("⚠️ `GITHUB_TOKEN` is missing! Cloud sync will not work.")
-            st.markdown("[How to get a token?](https://github.com/settings/tokens)")
+            st.warning("⚠️ `GITHUB_TOKEN` is required for Cloud sync.")
+            st.markdown("[Generate Token](https://github.com/settings/tokens)")
         
         st.divider()
         st.markdown("### 🖼️ Image Settings")
