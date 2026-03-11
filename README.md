@@ -7,11 +7,6 @@ If you're a developer, blogger, or designer, you often need a fast way to:
 1. **Compress Images**: Save storage space by converting heavy PNGs/JPGs to WebP format.
 2. **Auto-Host**: Get direct links for your website, GitHub README, or portfolio without manual uploads.
 3. **Speed Up Workflow**: Drag-and-drop multiple images, let them optimize in parallel, and push them to your repo in one click! ⚡
-4. Personally i use it for hosting screenshots of apps/tools/sites/softwares... 
-
----
-
-Each image you upload is converted to WebP at customizable quality, keeping your repo lean and your websites fast.
 
 ---
 
@@ -26,19 +21,29 @@ To use this from your phone without leaving your PC on:
    ```toml
    GITHUB_TOKEN = "your_personal_access_token_here"
    ```
-   *(Generate a token at [GitHub Settings](https://github.com/settings/tokens) with `repo` permissions.)*
 
-### 2. Use on Mobile
-1. Open the deployed URL on your phone's browser.
-2. **Android**: Tap the menu (three dots) and select **"Install App"** or **"Add to Home Screen"**.
-3. **iOS**: Tap the **Share** button and select **"Add to Home Screen"**.
-4. Now you have a high-performance image uploader right on your phone! 🚀
+### 🗝️ Troubleshooting "Bad Credentials" (401)
+If you see a `401 Bad Credentials` error, check your token settings on GitHub:
+- **Token Type**: Use a **Classic Token** (easier) or a Fine-grained Token.
+- **Classic Token Permissions**: Ensure you check the **`repo`** scope (Full control of private repositories).
+- **Fine-grained Token Permissions**:
+  - `Contents`: Read & Write
+  - `Metadata`: Read-only
+- **Format**: Ensure there are no extra spaces or quotes inside the `""` in your Streamlit Secrets.
+
+---
+
+## 🛠️ Local Setup
+To run this project on your own machine:
+1. `pip install -r requirements.txt`
+2. Set your token as an environment variable: `export GITHUB_TOKEN=your_token`
+3. `python -m streamlit run app.py`
 
 ---
 
 ## 🛡️ Security Check
-- **No Personal Tokens**: Ensure your GitHub Auth is handled via SSH or Git Credential Manager locally.
-- **Assets Folder**: Processed images are stored in `assets/`. Make sure this folder is tracked by git.
+- **No Personal Tokens**: Ensure your token is strictly kept in Steamlit Secrets or local environment variables. **Never** hardcode it in `app.py`.
+- **Assets Folder**: Processed images are stored in `assets/`.
 
 ## 🚀 Get Started Now!
 Just drop an image into the dashboard and watch the magic happen. ✨
