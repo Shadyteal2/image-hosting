@@ -15,8 +15,11 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Try to get GitHub Token from secrets (Cloud) or environment (Local)
+# Credentials & Configuration
 GITHUB_TOKEN = st.secrets.get("GITHUB_TOKEN", os.getenv("GITHUB_TOKEN"))
+# For security: Set a DASHBOARD_PIN in your Secrets
+DASHBOARD_PIN = st.secrets.get("DASHBOARD_PIN", os.getenv("DASHBOARD_PIN"))
+
 OUTPUT_DIR = "assets"
 GITHUB_USER = "Shadyteal2"
 GITHUB_REPO = "image-hosting"
@@ -147,6 +150,14 @@ def main():
         st.info(f"🌿 Branch: `{GITHUB_BRANCH}`")
         
         st.divider()
+        st.markdown("### 🔒 Security")
+        user_pin = st.text_input("Enter Dashboard PIN", type="password", help="Contact ShadyBilla for the PIN if you are not the owner.")
+        if DASHBOARD_PIN and user_pin != DASHBOARD_PIN:
+            st.error("Invalid PIN. Uploads are disabled.")
+        elif not DASHBOARD_PIN:
+            st.warning("No PIN set. Dashboard is public!")
+
+        st.divider()
         st.markdown("### 🔑 Credential Debugger")
         if GITHUB_TOKEN:
             st.success("✅ Token found in Secrets")
@@ -186,7 +197,10 @@ def main():
     if uploaded_files:
         st.write(f"📂 {len(uploaded_files)} files ready for processing.")
         
-        if st.button("⚡ Transform & Deploy"):
+        # Disable button if PIN is incorrect
+        btn_disabled = DASHBOARD_PIN is not None and user_pin != DASHBOARD_PIN
+        
+        if st.button("⚡ Transform & Deploy", disabled=btn_disabled):
             progress_bar = st.progress(0)
             status_text = st.empty()
             
