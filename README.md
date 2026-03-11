@@ -11,33 +11,28 @@ If you're a developer, blogger, or designer, you often need a fast way to:
 
 ---
 
-## 🛠️ How to Create One for Yourself
+Each image you upload is converted to WebP at customizable quality, keeping your repo lean and your websites fast.
 
-### 1. Using this Repo (The Fast Way)
-1. **Fork or Clone**: Download this repository to your computer.
-2. **Setup Virtual Environment**:
-   ```bash
-   python -m venv .venv
-   .venv\Scripts\activate
-   ```
-3. **Install Dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. **Configure `app.py`**:
-   Update the `GITHUB_USER` and `GITHUB_REPO` variables at the top of `app.py` to match your GitHub details.
-5. **Run It**:
-   ```bash
-   python -m streamlit run app.py
-   ```
+---
 
-### 2. Building from Scratch
-- **Language**: Python 🐍
-- **Frontend**: Streamlit (for the UI)
-- **Processing**: Pillow (for WebP conversion)
-- **Deployment**: Git (to push to GitHub)
+## 📱 Mobile & Cloud Setup (Personal Use)
 
-Each image you upload is converted to WebP at ~80% quality (customizable!), keeping your repo lean and your websites fast.
+To use this from your phone without leaving your PC on:
+
+### 1. Deploy to Streamlit Cloud
+1. Push your code to your GitHub repo.
+2. Go to [Streamlit Community Cloud](https://share.streamlit.io/) and connect your repo.
+3. **Crucial Step**: In the Streamlit Cloud dashboard, go to **Settings > Secrets** and add your GitHub Token:
+   ```toml
+   GITHUB_TOKEN = "your_personal_access_token_here"
+   ```
+   *(Generate a token at [GitHub Settings](https://github.com/settings/tokens) with `repo` permissions.)*
+
+### 2. Use on Mobile
+1. Open the deployed URL on your phone's browser.
+2. **Android**: Tap the menu (three dots) and select **"Install App"** or **"Add to Home Screen"**.
+3. **iOS**: Tap the **Share** button and select **"Add to Home Screen"**.
+4. Now you have a high-performance image uploader right on your phone! 🚀
 
 ---
 

@@ -1,10 +1,11 @@
 import streamlit as st
 import os
-import subprocess
 import concurrent.futures
 import time
+import io
 from PIL import Image
 from pathlib import Path
+from github import Github, GithubException
 
 # --- Configuration ---
 st.set_page_config(
@@ -14,9 +15,8 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Constants
-OUTPUT_DIR = "assets"
-# Try to detect git info automatically or use defaults
+# Try to get GitHub Token from secrets (Cloud) or environment (Local)
+GITHUB_TOKEN = st.secrets.get("GITHUB_TOKEN", os.getenv("GITHUB_TOKEN"))
 GITHUB_USER = "Shadyteal2"
 GITHUB_REPO = "image-hosting"
 GITHUB_BRANCH = "main"
@@ -79,38 +79,56 @@ def get_next_filename(original_filename, reserved_names):
         serial += 1
 
 def process_single_image(uploaded_file, dest_name, quality):
-    """Process a single image: convert to WebP at specified quality."""
+    """Process image and return bytes for API upload."""
     try:
-        dest_path = Path(OUTPUT_DIR) / dest_name
         img = Image.open(uploaded_file)
-        
-        # Optimize for WebP
         if img.mode in ("RGBA", "P"):
             img = img.convert("RGBA")
         else:
             img = img.convert("RGB")
             
-        img.save(dest_path, "webp", quality=quality)
-        return {"name": dest_name, "success": True, "error": None}
-    except Exception as e:
-        return {"name": dest_name, "success": False, "error": str(e)}
-
-def sync_to_github():
-    """Run git add, commit, and push."""
-    try:
-        # Check if assets folder changed
-        status = subprocess.run(["git", "status", "--porcelain", OUTPUT_DIR], capture_output=True, text=True, check=True)
-        if not status.stdout.strip():
-            return True, "Already up to date."
+        # Save to buffer
+        buf = io.BytesIO()
+        img.save(buf, "webp", quality=quality)
+        content = buf.getvalue()
+        
+        # Also save locally for preview/cache
+        dest_path = Path(OUTPUT_DIR) / dest_name
+        with open(dest_path, "wb") as f:
+            f.write(content)
             
-        subprocess.run(["git", "add", OUTPUT_DIR], check=True, capture_output=True)
-        subprocess.run(["git", "commit", "-m", f"Dashboard Update: {time.strftime('%Y-%m-%d %H:%M:%S')}"], check=True, capture_output=True)
-        subprocess.run(["git", "push", "origin", GITHUB_BRANCH], check=True, capture_output=True)
-        return True, "Successfully pushed to GitHub."
-    except subprocess.CalledProcessError as e:
-        return False, f"Git Error: {e.stderr}"
+        return {"name": dest_name, "success": True, "error": None, "content": content}
     except Exception as e:
-        return False, str(e)
+        return {"name": dest_name, "success": False, "error": str(e), "content": None}
+
+def sync_to_github_api(results):
+    """Upload processed images via GitHub API."""
+    if not GITHUB_TOKEN:
+        return False, "GITHUB_TOKEN not found. Please add it to Streamlit Secrets or Environment Variables."
+    
+    try:
+        g = Github(GITHUB_TOKEN)
+        repo = g.get_user(GITHUB_USER).get_repo(GITHUB_REPO)
+        
+        success_list = [r for r in results if r['success']]
+        for res in success_list:
+            path = f"{OUTPUT_DIR}/{res['name']}"
+            message = f"Cloud Upload: {res['name']}"
+            
+            try:
+                # Check if file exists to update
+                contents = repo.get_contents(path, ref=GITHUB_BRANCH)
+                repo.update_file(path, message, res['content'], contents.sha, branch=GITHUB_BRANCH)
+            except GithubException as e:
+                if e.status == 404:
+                    # Create new file
+                    repo.create_file(path, message, res['content'], branch=GITHUB_BRANCH)
+                else:
+                    raise e
+                    
+        return True, f"Successfully uploaded {len(success_list)} images via API."
+    except Exception as e:
+        return False, f"GitHub API Error: {str(e)}"
 
 # --- Main Dashboard ---
 
@@ -122,6 +140,9 @@ def main():
         st.info(f"📍 Output: `/{OUTPUT_DIR}`")
         st.info(f"🔗 Repo: `{GITHUB_USER}/{GITHUB_REPO}`")
         st.info(f"🌿 Branch: `{GITHUB_BRANCH}`")
+        if not GITHUB_TOKEN:
+            st.warning("⚠️ `GITHUB_TOKEN` is missing! Cloud sync will not work.")
+            st.markdown("[How to get a token?](https://github.com/settings/tokens)")
         
         st.divider()
         st.markdown("### 🖼️ Image Settings")
@@ -181,8 +202,8 @@ def main():
             # Step 3: GitHub Sync
             success_count = sum(1 for r in results if r['success'])
             if success_count > 0:
-                status_text.text("☁️ Syncing to GitHub...")
-                sync_ok, sync_msg = sync_to_github()
+                status_text.text("☁️ Syncing to GitHub API...")
+                sync_ok, sync_msg = sync_to_github_api(results)
                 progress_bar.progress(100)
                 
                 if sync_ok:
