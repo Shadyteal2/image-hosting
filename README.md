@@ -36,15 +36,13 @@ If you're a developer, blogger, or designer, you often need a fast way to:
 - **Processing**: Pillow (for WebP conversion)
 - **Deployment**: Git (to push to GitHub)
 
+Each image you upload is converted to WebP at ~80% quality (customizable!), keeping your repo lean and your websites fast.
+
 ---
 
-## 🛡️ Privacy & Security
-- **Secret Filenames**: Enable the **"Secret Filenames (UUID)"** toggle in the dashboard. This generates random, 36-character filenames (e.g., `a1b2c3d4...webp`), making it impossible for others to guess your links.
-- **Hiding the File List**: If you want your `assets/` folder to be completely unbrowseable:
-  1. Make this repository **Private**.
-  2. Connect it to **Vercel** or **Netlify** (both free).
-  3. They will serve your images via direct links but will **not** show a file list to the public.
-- **No Personal Tokens**: Your GitHub credentials remain safe on your local machine.
+## 🛡️ Security Check
+- **No Personal Tokens**: Ensure your GitHub Auth is handled via SSH or Git Credential Manager locally.
+- **Assets Folder**: Processed images are stored in `assets/`. Make sure this folder is tracked by git.
 
 ## 🚀 Get Started Now!
 Just drop an image into the dashboard and watch the magic happen. ✨

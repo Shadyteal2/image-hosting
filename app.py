@@ -3,7 +3,6 @@ import os
 import subprocess
 import concurrent.futures
 import time
-import uuid
 from PIL import Image
 from pathlib import Path
 
@@ -62,28 +61,22 @@ st.markdown("""
 def ensure_dir():
     Path(OUTPUT_DIR).mkdir(parents=True, exist_ok=True)
 
-def get_next_filename(original_filename, reserved_names, use_uuid=False):
+def get_next_filename(original_filename, reserved_names):
     """
-    Generate filename. If use_uuid is True, use a random UUID.
-    Otherwise, keep original name with serial.
+    Keep original filename, append serial number, and convert extension to webp.
+    Example: photo.jpg -> photo-1.webp
     """
+    stem = Path(original_filename).stem
     suffix = ".webp"
     
-    if use_uuid:
-        while True:
-            new_name = f"{uuid.uuid4()}{suffix}"
-            if new_name not in reserved_names and not (Path(OUTPUT_DIR) / new_name).exists():
-                reserved_names.add(new_name)
-                return new_name
-    else:
-        stem = Path(original_filename).stem
-        serial = 1
-        while True:
-            new_name = f"{stem}-{serial}{suffix}"
-            if new_name not in reserved_names and not (Path(OUTPUT_DIR) / new_name).exists():
-                reserved_names.add(new_name)
-                return new_name
-            serial += 1
+    # Sanitize stem (remove spaces/special chars if needed, but keeping it simple for now)
+    serial = 1
+    while True:
+        new_name = f"{stem}-{serial}{suffix}"
+        if new_name not in reserved_names and not (Path(OUTPUT_DIR) / new_name).exists():
+            reserved_names.add(new_name)
+            return new_name
+        serial += 1
 
 def process_single_image(uploaded_file, dest_name, quality):
     """Process a single image: convert to WebP at specified quality."""
@@ -133,7 +126,6 @@ def main():
         st.divider()
         st.markdown("### 🖼️ Image Settings")
         quality = st.slider("WebP Compression Quality", min_value=10, max_value=100, value=80, step=5, help="Higher = Better quality, lager file size. Recommended: 80")
-        secret_naming = st.toggle("Secret Filenames (UUID)", value=False, help="Disable readable names and use random 36-character strings to increase privacy.")
         
         st.divider()
         st.markdown("### 🛠️ Quick Controls")
@@ -165,7 +157,7 @@ def main():
             reserved_names = set()
             tasks = []
             for file in uploaded_files:
-                dest_name = get_next_filename(file.name, reserved_names, use_uuid=secret_naming)
+                dest_name = get_next_filename(file.name, reserved_names)
                 tasks.append((file, dest_name))
             
             # Step 2: Multi-threaded Processing
