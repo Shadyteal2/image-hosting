@@ -6,7 +6,7 @@ A high-performance local & cloud web dashboard built with Streamlit for optimizi
 - **Speed**: Optimize and sync images to your repo in seconds, even from your phone.
 - **Hosting**: Instant `raw.githubusercontent.com` links for your websites or portfolio.
 - **Portability**: No more opening your PC just to upload an image—use the mobile web app!
-
+- **Personally I use this repository exclusively to host public domain screenshots of apps/sites/softwares/tools etc**
 ---
 
 ## 🔒 Security Architecture
